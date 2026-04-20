@@ -1,113 +1,203 @@
-import Image from "next/image";
+'use client';
+
+import { useState } from 'react';
+import Link from 'next/link';
+import Layout from '@/components/layout/Layout';
+import { Button, Card } from '@/cui';
 
 export default function Home() {
+  const [activeFeature, setActiveFeature] = useState(0);
+
+  const features = [
+    { title: 'Custom Designs', description: 'Bring your dream cake to life', icon: '🎨' },
+    { title: 'Premium Ingredients', description: 'Only the finest quality', icon: '⭐' },
+    { title: 'Fast Delivery', description: 'Fresh to your door', icon: '🚚' },
+  ];
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:size-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    <Layout>
+      {/* Hero Section */}
+      <section className="relative bg-gradient-to-br from-primary-50 via-white to-secondary-50 px-4 sm:px-6 lg:px-8 py-20 md:py-32">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div>
+              <h1 className="text-5xl md:text-6xl lg:text-7xl font-display font-bold text-neutral-900 mb-6">
+                Sweetness
+                <span className="block text-primary-600">Delivered</span>
+              </h1>
+              <p className="text-xl text-neutral-600 mb-8">
+                Handcrafted cakes made with love, passion, and the finest ingredients. 
+                Perfect for every celebration, big or small.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Link href="/order-online">
+                  <Button color="primary" size="xl">
+                    Order Now
+                  </Button>
+                </Link>
+                <Link href="/products">
+                  <Button variant="outline" size="xl">
+                    Browse Cakes
+                  </Button>
+                </Link>
+              </div>
+            </div>
+            <div className="relative">
+              <div className="bg-gradient-to-br from-primary-200 to-secondary-200 rounded-3xl h-96 flex items-center justify-center shadow-2xl">
+                <span className="text-9xl">🎂</span>
+              </div>
+              <div className="absolute -bottom-4 -right-4 bg-white rounded-2xl shadow-xl p-4">
+                <div className="flex items-center space-x-2">
+                  <span className="text-3xl">⭐</span>
+                  <div>
+                    <div className="font-bold text-neutral-900">4.9/5</div>
+                    <div className="text-xs text-neutral-600">10k+ Reviews</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+      </section>
 
-      <div className="relative z-[-1] flex place-items-center before:absolute before:h-[300px] before:w-full before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-full after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 sm:before:w-[480px] sm:after:w-[240px] before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
+      {/* Features */}
+      <section className="px-4 sm:px-6 lg:px-8 py-20 bg-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-neutral-900 mb-4">Why Choose CakeAnatomy?</h2>
+            <p className="text-xl text-neutral-600 max-w-2xl mx-auto">
+              We're passionate about creating the perfect cake for your special moments
+            </p>
+          </div>
 
-      <div className="mb-32 grid text-center lg:mb-0 lg:w-full lg:max-w-5xl lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Docs{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
+          <div className="grid md:grid-cols-3 gap-8">
+            {features.map((feature, idx) => (
+              <Card 
+                key={idx} 
+                hoverable 
+                elevated
+                className={`cursor-pointer transition-all ${activeFeature === idx ? 'ring-2 ring-primary-600' : ''}`}
+                onClick={() => setActiveFeature(idx)}
+              >
+                <Card.Body className="text-center">
+                  <div className="text-6xl mb-4">{feature.icon}</div>
+                  <h3 className="text-2xl font-bold text-neutral-900 mb-2">{feature.title}</h3>
+                  <p className="text-neutral-600">{feature.description}</p>
+                </Card.Body>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Popular Products */}
+      <section className="px-4 sm:px-6 lg:px-8 py-20 bg-neutral-50">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-neutral-900 mb-4">Bestsellers</h2>
+            <p className="text-xl text-neutral-600">Our customers' favorite cakes</p>
+          </div>
+
+          <div className="grid md:grid-cols-4 gap-6">
+            {['Chocolate Dream', 'Vanilla Heaven', 'Red Velvet', 'Lemon Bliss'].map((name, idx) => (
+              <Card key={idx} hoverable elevated>
+                <Card.Body>
+                  <div className="bg-gradient-to-br from-primary-100 to-secondary-100 h-48 rounded-lg mb-4 flex items-center justify-center">
+                    <span className="text-6xl">🍰</span>
+                  </div>
+                  <h3 className="font-bold text-neutral-900 mb-2">{name}</h3>
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-2xl font-bold text-primary-600">$45</span>
+                    <div className="flex items-center text-sm text-warning-600">
+                      <span>⭐ 4.9</span>
+                    </div>
+                  </div>
+                  <Button color="primary" size="sm" fullWidth>
+                    Add to Cart
+                  </Button>
+                </Card.Body>
+              </Card>
+            ))}
+          </div>
+
+          <div className="text-center mt-12">
+            <Link href="/products">
+              <Button variant="outline" size="lg">
+                View All Products
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Custom Cake CTA */}
+      <section className="px-4 sm:px-6 lg:px-8 py-20 bg-gradient-to-r from-primary-600 to-secondary-600">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+            Design Your Dream Cake
           </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Find in-depth information about Next.js features and API.
+          <p className="text-xl text-white/90 mb-8">
+            Work with our expert bakers to create a custom cake that's uniquely yours. 
+            Perfect for weddings, birthdays, and special celebrations.
           </p>
-        </a>
+          <Link href="/customised-cake">
+            <Button variant="outline" size="xl" className="bg-white text-primary-600 hover:bg-neutral-50">
+              Start Designing
+            </Button>
+          </Link>
+        </div>
+      </section>
 
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Learn{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
+      {/* Testimonials */}
+      <section className="px-4 sm:px-6 lg:px-8 py-20 bg-white">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-4xl font-bold text-neutral-900 mb-16 text-center">
+            What Our Customers Say
           </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
 
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Templates{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Explore starter templates for Next.js.
-          </p>
-        </a>
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              { name: 'Sarah Johnson', text: 'The most delicious cake I\'ve ever had! Perfect for our wedding.', rating: 5 },
+              { name: 'Michael Chen', text: 'Amazing custom design and incredible taste. Highly recommend!', rating: 5 },
+              { name: 'Emily Rodriguez', text: 'Fast delivery and the cake looked exactly like the design. Love it!', rating: 5 },
+            ].map((testimonial, idx) => (
+              <Card key={idx}>
+                <Card.Body>
+                  <div className="flex mb-3">
+                    {[...Array(testimonial.rating)].map((_, i) => (
+                      <svg key={i} className="w-5 h-5 text-warning-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                    ))}
+                  </div>
+                  <p className="text-neutral-700 mb-4 italic">"{testimonial.text}"</p>
+                  <p className="font-semibold text-neutral-900">{testimonial.name}</p>
+                </Card.Body>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
 
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Deploy{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-balance text-sm opacity-50">
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
+      {/* Newsletter */}
+      <section className="px-4 sm:px-6 lg:px-8 py-20 bg-neutral-50">
+        <div className="max-w-2xl mx-auto text-center">
+          <h2 className="text-3xl font-bold text-neutral-900 mb-4">Stay Sweet with Us</h2>
+          <p className="text-neutral-600 mb-8">
+            Subscribe to get special offers, free giveaways, and new flavor announcements
           </p>
-        </a>
-      </div>
-    </main>
+          <div className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+            <input
+              type="email"
+              placeholder="Enter your email"
+              className="flex-1 px-4 py-3 rounded-lg border border-neutral-300 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+            />
+            <Button color="primary" size="lg">
+              Subscribe
+            </Button>
+          </div>
+        </div>
+      </section>
+    </Layout>
   );
 }
