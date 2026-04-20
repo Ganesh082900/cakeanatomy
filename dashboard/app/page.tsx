@@ -1,65 +1,223 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import { useState } from 'react';
+import { Button, Card, Input, Modal, Select } from '@/cui';
+
+export default function Dashboard() {
+  const [modalOpen, setModalOpen] = useState(false);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <main className="min-h-screen bg-neutral-50">
+      {/* Sidebar */}
+      <aside className="fixed left-0 top-0 h-full w-64 bg-white border-r border-neutral-200 p-6">
+        <h2 className="text-2xl font-bold text-primary-600 mb-8">CakeAnatomy</h2>
+        <nav className="space-y-2">
+          <a href="#" className="block px-4 py-2 rounded-lg bg-primary-50 text-primary-700 font-medium">
+            Dashboard
+          </a>
+          <a href="#" className="block px-4 py-2 rounded-lg text-neutral-600 hover:bg-neutral-50">
+            Analytics
+          </a>
+          <a href="#" className="block px-4 py-2 rounded-lg text-neutral-600 hover:bg-neutral-50">
+            Reports
+          </a>
+          <a href="#" className="block px-4 py-2 rounded-lg text-neutral-600 hover:bg-neutral-50">
+            Settings
+          </a>
+        </nav>
+      </aside>
+
+      {/* Main Content */}
+      <div className="ml-64 p-8">
+        {/* Header */}
+        <header className="mb-8">
+          <h1 className="text-4xl font-bold text-neutral-900 mb-2">
+            Dashboard
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="text-neutral-600">
+            Welcome to your CUI-powered dashboard
           </p>
+        </header>
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <Card>
+            <Card.Body>
+              <p className="text-sm text-neutral-600 mb-1">Total Users</p>
+              <p className="text-3xl font-bold text-neutral-900">2,543</p>
+              <p className="text-sm text-success-600 mt-2">↑ 12% from last month</p>
+            </Card.Body>
+          </Card>
+
+          <Card>
+            <Card.Body>
+              <p className="text-sm text-neutral-600 mb-1">Revenue</p>
+              <p className="text-3xl font-bold text-neutral-900">$45,231</p>
+              <p className="text-sm text-success-600 mt-2">↑ 8% from last month</p>
+            </Card.Body>
+          </Card>
+
+          <Card>
+            <Card.Body>
+              <p className="text-sm text-neutral-600 mb-1">Active Projects</p>
+              <p className="text-3xl font-bold text-neutral-900">18</p>
+              <p className="text-sm text-warning-600 mt-2">→ No change</p>
+            </Card.Body>
+          </Card>
+
+          <Card>
+            <Card.Body>
+              <p className="text-sm text-neutral-600 mb-1">Completion Rate</p>
+              <p className="text-3xl font-bold text-neutral-900">94%</p>
+              <p className="text-sm text-success-600 mt-2">↑ 3% from last month</p>
+            </Card.Body>
+          </Card>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          {/* Recent Activity */}
+          <Card>
+            <Card.Header>
+              <h3 className="text-lg font-semibold">Recent Activity</h3>
+            </Card.Header>
+            <Card.Body>
+              <div className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-2 h-2 bg-primary-500 rounded-full mt-2"></div>
+                  <div>
+                    <p className="font-medium text-neutral-900">New user registered</p>
+                    <p className="text-sm text-neutral-500">2 minutes ago</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-2 h-2 bg-success-500 rounded-full mt-2"></div>
+                  <div>
+                    <p className="font-medium text-neutral-900">Project completed</p>
+                    <p className="text-sm text-neutral-500">1 hour ago</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-2 h-2 bg-warning-500 rounded-full mt-2"></div>
+                  <div>
+                    <p className="font-medium text-neutral-900">System update available</p>
+                    <p className="text-sm text-neutral-500">3 hours ago</p>
+                  </div>
+                </div>
+              </div>
+            </Card.Body>
+            <Card.Footer>
+              <Button variant="ghost" size="sm">View All Activity</Button>
+            </Card.Footer>
+          </Card>
+
+          {/* Quick Actions */}
+          <Card>
+            <Card.Header>
+              <h3 className="text-lg font-semibold">Quick Actions</h3>
+            </Card.Header>
+            <Card.Body>
+              <div className="space-y-3">
+                <Input 
+                  label="Project Name"
+                  placeholder="Enter project name"
+                  fullWidth
+                />
+                <Select
+                  label="Category"
+                  placeholder="Select category"
+                  options={[
+                    { value: 'design', label: 'Design' },
+                    { value: 'development', label: 'Development' },
+                    { value: 'marketing', label: 'Marketing' },
+                  ]}
+                  fullWidth
+                />
+                <Button color="primary" fullWidth onClick={() => setModalOpen(true)}>
+                  Create New Project
+                </Button>
+              </div>
+            </Card.Body>
+          </Card>
+        </div>
+
+        {/* CUI Features */}
+        <Card>
+          <Card.Header>
+            <h3 className="text-lg font-semibold">CUI Design System Features</h3>
+          </Card.Header>
+          <Card.Body>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="text-center">
+                <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                  <svg className="w-6 h-6 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                  </svg>
+                </div>
+                <h4 className="font-semibold mb-1">Consistent Design</h4>
+                <p className="text-sm text-neutral-600">Unified tokens across all apps</p>
+              </div>
+
+              <div className="text-center">
+                <div className="w-12 h-12 bg-secondary-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                  <svg className="w-6 h-6 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  </svg>
+                </div>
+                <h4 className="font-semibold mb-1">Accessibility First</h4>
+                <p className="text-sm text-neutral-600">WCAG compliant components</p>
+              </div>
+
+              <div className="text-center">
+                <div className="w-12 h-12 bg-success-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                  <svg className="w-6 h-6 text-success-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                  </svg>
+                </div>
+                <h4 className="font-semibold mb-1">Developer Friendly</h4>
+                <p className="text-sm text-neutral-600">TypeScript & Storybook ready</p>
+              </div>
+            </div>
+          </Card.Body>
+        </Card>
+      </div>
+
+      {/* Modal */}
+      <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} size="lg">
+        <Modal.Header>Create New Project</Modal.Header>
+        <Modal.Body>
+          <div className="space-y-4">
+            <Input 
+              label="Project Name"
+              placeholder="My Awesome Project"
+              fullWidth
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+            <Input 
+              label="Description"
+              placeholder="Brief project description"
+              fullWidth
+            />
+            <Select
+              label="Team"
+              placeholder="Select team"
+              options={[
+                { value: 'team1', label: 'Design Team' },
+                { value: 'team2', label: 'Development Team' },
+                { value: 'team3', label: 'Marketing Team' },
+              ]}
+              fullWidth
+            />
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="outline" onClick={() => setModalOpen(false)}>
+            Cancel
+          </Button>
+          <Button onClick={() => setModalOpen(false)}>
+            Create Project
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    </main>
   );
 }
