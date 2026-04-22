@@ -1,0 +1,8 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:Ganesh082900/cakeanatomy.git",
+  "author": "Pendyala Ganesh <ganeshpendyala2000@gmail.com>",
+  "license": "MIT"
+}
