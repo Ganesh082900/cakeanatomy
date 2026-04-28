@@ -1,67 +1,72 @@
+'use client';
+
+import React, { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Layout from '@/components/layout/Layout';
-import { Card, Button } from '@/cui';
+import { Card, Button, Input } from '@/cui';
+import { ProductCard } from '@/components/products/ProductCard';
+import { getProducts, getCategories, Product, Category } from '@/lib/services';
 
 export default function ProductsPage() {
-  const products = [
-    {
-      name: 'Classic Chocolate Cake',
-      category: 'Bestseller',
-      price: '$45',
-      description: 'Rich chocolate layers with ganache',
-      rating: 4.9,
-    },
-    {
-      name: 'Vanilla Bean Delight',
-      category: 'Classic',
-      price: '$40',
-      description: 'Madagascar vanilla with buttercream',
-      rating: 4.8,
-    },
-    {
-      name: 'Red Velvet Supreme',
-      category: 'Premium',
-      price: '$50',
-      description: 'Classic red velvet with cream cheese frosting',
-      rating: 5.0,
-    },
-    {
-      name: 'Lemon Blueberry Cake',
-      category: 'Seasonal',
-      price: '$48',
-      description: 'Fresh lemon with blueberry compote',
-      rating: 4.7,
-    },
-    {
-      name: 'Tiramisu Cake',
-      category: 'Specialty',
-      price: '$55',
-      description: 'Coffee-soaked layers with mascarpone',
-      rating: 4.9,
-    },
-    {
-      name: 'Carrot Walnut Cake',
-      category: 'Classic',
-      price: '$42',
-      description: 'Spiced carrot cake with cream cheese frosting',
-      rating: 4.6,
-    },
-    {
-      name: 'Black Forest Cake',
-      category: 'Premium',
-      price: '$52',
-      description: 'Chocolate layers with cherry and cream',
-      rating: 4.8,
-    },
-    {
-      name: 'Strawberry Shortcake',
-      category: 'Seasonal',
-      price: '$46',
-      description: 'Light sponge with fresh strawberries',
-      rating: 4.7,
-    },
-  ];
+  const searchParams = useSearchParams();
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const categories = ['All', 'Bestseller', 'Classic', 'Premium', 'Seasonal', 'Specialty'];
+  // Filters
+  const [search, setSearch] = useState(searchParams.get('search') || '');
+  const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || '');
+  const [selectedType, setSelectedType] = useState(searchParams.get('type') || '');
+  const [sortBy, setSortBy] = useState(searchParams.get('sort') || 'featured');
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [search, selectedCategory, selectedType, sortBy, page]);
+
+  const fetchCategories = async () => {
+    try {
+      const data = await getCategories();
+      setCategories(data);
+    } catch (err) {
+      console.error('Failed to load categories');
+    }
+  };
+
+  const fetchProducts = async () => {
+    try {
+      setIsLoading(true);
+      const params: any = { page, limit: 12 };
+      
+      if (search) params.search = search;
+      if (selectedCategory) params.category = selectedCategory;
+      if (selectedType) params.type = selectedType;
+      if (sortBy && sortBy !== 'featured') params.sort = sortBy;
+
+      const data = await getProducts(params);
+      setProducts(data.products);
+      setTotalPages(data.pages);
+      setError('');
+    } catch (err: any) {
+      setError(err.message || 'Failed to load products');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    setPage(1);
+    fetchProducts();
+  };
+
+  const productTypes = ['All Types', 'pastry', 'confection', 'bakery', 'cake'];
 
   return (
     <Layout>
@@ -76,68 +81,162 @@ export default function ProductsPage() {
           </p>
         </div>
 
-        {/* Filters */}
+        {/* Search & Filters */}
         <div className="mb-12">
+          {/* Search Bar */}
+          <form onSubmit={handleSearch} className="max-w-2xl mx-auto mb-8">
+            <div className="flex gap-2">
+              <Input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search for cakes, pastries, confections..."
+                className="flex-1"
+              />
+              <Button type="submit" color="primary">
+                Search
+              </Button>
+            </div>
+          </form>
+
+          {/* Category Filters */}
           <div className="flex flex-wrap justify-center gap-3 mb-6">
-            {categories.map((category, idx) => (
+            <button
+              onClick={() => {
+                setSelectedCategory('');
+                setPage(1);
+              }}
+              className={`px-6 py-2 rounded-full font-medium transition-colors ${
+                selectedCategory === ''
+                  ? 'bg-primary-600 text-white'
+                  : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
+              }`}
+            >
+              All
+            </button>
+            {categories.map((category) => (
               <button
-                key={idx}
+                key={category._id}
+                onClick={() => {
+                  setSelectedCategory(category._id);
+                  setPage(1);
+                }}
                 className={`px-6 py-2 rounded-full font-medium transition-colors ${
-                  idx === 0
+                  selectedCategory === category._id
                     ? 'bg-primary-600 text-white'
                     : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
                 }`}
               >
-                {category}
+                {category.name}
               </button>
             ))}
           </div>
           
-          <div className="flex justify-center gap-4">
-            <select className="px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
-              <option>Sort by: Featured</option>
-              <option>Price: Low to High</option>
-              <option>Price: High to Low</option>
-              <option>Rating</option>
-              <option>Name</option>
+          {/* Type & Sort Filters */}
+          <div className="flex flex-wrap justify-center gap-4">
+            <select
+              value={selectedType}
+              onChange={(e) => {
+                setSelectedType(e.target.value);
+                setPage(1);
+              }}
+              className="px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+            >
+              {productTypes.map((type) => (
+                <option key={type} value={type === 'All Types' ? '' : type}>
+                  {type === 'All Types' ? type : type.charAt(0).toUpperCase() + type.slice(1)}
+                </option>
+              ))}
+            </select>
+            <select
+              value={sortBy}
+              onChange={(e) => {
+                setSortBy(e.target.value);
+                setPage(1);
+              }}
+              className="px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+            >
+              <option value="featured">Sort by: Featured</option>
+              <option value="price-asc">Price: Low to High</option>
+              <option value="price-desc">Price: High to Low</option>
+              <option value="name">Name: A to Z</option>
+              <option value="rating">Top Rated</option>
             </select>
           </div>
         </div>
 
-        {/* Products Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-          {products.map((product, idx) => (
-            <Card key={idx} hoverable elevated>
-              <Card.Body>
-                <div className="relative">
-                  <div className="bg-gradient-to-br from-primary-100 to-secondary-100 h-48 rounded-lg mb-4 flex items-center justify-center">
-                    <span className="text-6xl">🍰</span>
-                  </div>
-                  <span className="absolute top-2 right-2 px-3 py-1 bg-white rounded-full text-xs font-semibold text-primary-600 shadow-md">
-                    {product.category}
-                  </span>
-                </div>
-                
-                <h3 className="text-lg font-bold text-neutral-900 mb-2">{product.name}</h3>
-                <p className="text-sm text-neutral-600 mb-3">{product.description}</p>
-                
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-2xl font-bold text-primary-600">{product.price}</span>
-                  <div className="flex items-center text-sm">
-                    <svg className="w-4 h-4 text-warning-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                    <span className="font-semibold">{product.rating}</span>
-                  </div>
-                </div>
+        {/* Error Message */}
+        {error && (
+          <div className="bg-error-50 border border-error-200 text-error-700 px-4 py-3 rounded-lg mb-8 text-center">
+            {error}
+          </div>
+        )}
 
-                <Button color="primary" fullWidth>
-                  Add to Cart
+        {/* Loading State */}
+        {isLoading ? (
+          <div className="text-center py-16">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
+            <p className="mt-4 text-neutral-600">Loading products...</p>
+          </div>
+        ) : products.length === 0 ? (
+          <div className="text-center py-16">
+            <p className="text-xl text-neutral-600 mb-4">No products found</p>
+            <Button
+              onClick={() => {
+                setSearch('');
+                setSelectedCategory('');
+                setSelectedType('');
+                setSortBy('featured');
+                setPage(1);
+              }}
+            >
+              Clear Filters
+            </Button>
+          </div>
+        ) : (
+          <>
+            {/* Products Grid */}
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 mb-12">
+              {products.map((product) => (
+                <ProductCard key={product._id} product={product} />
+              ))}
+            </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex justify-center items-center gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                >
+                  Previous
                 </Button>
-              </Card.Body>
-            </Card>
-          ))}
-        </div>
+                <div className="flex gap-2">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                    <button
+                      key={p}
+                      onClick={() => setPage(p)}
+                      className={`w-10 h-10 rounded-lg font-medium transition-colors ${
+                        page === p
+                          ? 'bg-primary-600 text-white'
+                          : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
+                      }`}
+                    >
+                      {p}
+                    </button>
+                  ))}
+                </div>
+                <Button
+                  variant="outline"
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page === totalPages}
+                >
+                  Next
+                </Button>
+              </div>
+            )}
+          </>
+        )}
 
         {/* CTA */}
         <Card className="bg-primary-600 text-white">

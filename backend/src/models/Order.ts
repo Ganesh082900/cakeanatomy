@@ -3,14 +3,15 @@ import mongoose, { Document, Schema } from 'mongoose';
 export interface IOrderItem {
   product: mongoose.Types.ObjectId;
   name: string;
+  image: string;
   quantity: number;
   price: number;
-  customization?: {
-    flavor?: string;
-    size?: string;
-    message?: string;
-    designImage?: string;
-  };
+  selectedVariants?: Array<{
+    name: string;
+    value: string;
+    priceModifier: number;
+  }>;
+  subtotal: number;
 }
 
 export interface IOrder extends Document {

@@ -1,197 +1,323 @@
 # CakeAnatomy Backend API
 
-Complete backend system for the CakeAnatomy dashboard with multi-channel order management, inventory tracking, staff management, and analytics.
+Complete backend system for the CakeAnatomy e-commerce platform built with Node.js, Express, TypeScript, and MongoDB.
 
-## 🚀 Quick Start
+## Features
 
-### Prerequisites
-- Node.js (v18+)
-- MongoDB (v6+)
+- ✅ User Authentication & Authorization (JWT)
+- ✅ Product Management (CRUD operations)
+- ✅ Category Management
+- ✅ Shopping Cart System
+- ✅ Order Processing & Management
+- ✅ Address Management
+- ✅ Admin Dashboard APIs
+- ✅ Review & Rating System
+- ✅ Security (Helmet, Rate Limiting, CORS)
+- ✅ Input Validation
+- ✅ Error Handling
+- ✅ Database Seeding
 
-### Installation
+## Tech Stack
+
+- **Runtime**: Node.js with TypeScript
+- **Framework**: Express.js
+- **Database**: MongoDB with Mongoose ODM
+- **Authentication**: JWT (JSON Web Tokens)
+- **Validation**: Express Validator
+- **Security**: Helmet, CORS, Rate Limiting
+- **Password Hashing**: bcryptjs
+
+## Quick Start
+
+### 1. Install Dependencies
 
 ```bash
-# Install dependencies
 npm install
-
-# Create .env file (already created)
-# Edit .env with your MongoDB URI if needed
-
-# Seed the database with sample data
-npm run seed
-
-# Start development server
-npm run dev
-
-# Build for production
-npm run build
-
-# Start production server
-npm start
+# or
+yarn install
 ```
 
-## 📊 Database Models
+### 2. Environment Setup
 
-### Core Models
-- **User** - Customer data with loyalty points
-- **Staff** - Employee information and roles
-- **Product** - Product catalog
-- **Category** - Product categories
-- **Order** - Orders with multi-source tracking (Platform, Swiggy, Zomato, In-store, Phone, WhatsApp)
-
-### Inventory Management
-- **RawMaterial** - Raw materials with expiry tracking
-- **Recipe** - Recipes with ingredient lists
-- **Production** - Production scheduling and tracking
-
-### Marketing & Promotions
-- **Coupon** - Discount coupons
-- **GiftCard** - Gift card management
-- **Campaign** - Email/SMS/WhatsApp campaigns
-
-### Operations
-- **Attendance** - Staff attendance tracking
-
-## 🔌 API Endpoints
-
-### Analytics
-- `GET /api/analytics/dashboard-overview` - Dashboard metrics
-- `GET /api/analytics/sales-by-source` - Sales breakdown by source
-- `GET /api/analytics/product-performance` - Top products
-- `GET /api/analytics/inventory-status` - Inventory overview
-- `GET /api/analytics/staff-performance` - Staff metrics
-- `GET /api/analytics/financial-report` - Financial summary
-
-### Orders
-- `GET /api/orders` - All orders (with pagination)
-- `GET /api/orders/source/:source` - Orders by source (swiggy, zomato, etc.)
-- `GET /api/orders/cancelled` - Cancelled orders
-- `GET /api/orders/custom-cakes` - Custom cake orders
-- `GET /api/orders/:id` - Order details
-- `POST /api/orders` - Create order
-- `PATCH /api/orders/:id/status` - Update order status
-
-### Staff
-- `GET /api/staff` - All staff
-- `GET /api/staff/:id` - Staff details
-- `POST /api/staff` - Create staff
-- `PUT /api/staff/:id` - Update staff
-- `GET /api/staff/:id/attendance` - Staff attendance
-- `POST /api/staff/:id/clock-in` - Clock in
-- `POST /api/staff/:id/clock-out` - Clock out
-- `POST /api/staff/:id/leave` - Mark leave
-
-### Inventory
-- `GET /api/inventory/materials` - All raw materials
-- `GET /api/inventory/materials/low-stock` - Low stock items
-- `GET /api/inventory/materials/expiring` - Expiring items
-- `GET /api/inventory/recipes` - All recipes
-- `POST /api/inventory/materials` - Add material
-- `POST /api/inventory/recipes` - Add recipe
-
-### Products
-- `GET /api/products` - All products
-- `GET /api/products/featured` - Featured products
-- `POST /api/products` - Create product
-- `PUT /api/products/:id` - Update product
-
-### Coupons & Gift Cards
-- `GET /api/coupons/coupons` - All coupons
-- `POST /api/coupons/coupons` - Create coupon
-- `POST /api/coupons/coupons/validate` - Validate coupon
-- `GET /api/coupons/gift-cards` - All gift cards
-- `POST /api/coupons/gift-cards` - Create gift card
-
-### Campaigns
-- `GET /api/campaigns` - All campaigns
-- `POST /api/campaigns` - Create campaign
-- `POST /api/campaigns/:id/send` - Send campaign
-- `POST /api/campaigns/:id/schedule` - Schedule campaign
-
-### Production
-- `GET /api/production` - All production records
-- `GET /api/production/today` - Today's production
-- `POST /api/production` - Schedule production
-- `POST /api/production/:id/start` - Start production
-- `POST /api/production/:id/complete` - Complete production
-
-### Users
-- `GET /api/users` - All customers
-- `GET /api/users/:id/orders` - Customer orders
-- `POST /api/users/:id/loyalty-points` - Add loyalty points
-
-## 📦 Seed Data
-
-The seed script creates:
-- 5 Staff members (1 admin, 4 employees)
-- 30 days of attendance records
-- 5 Product categories
-- 10 Raw materials with realistic stock levels
-- 4 Recipes with ingredients
-- 6 Products (cakes, cookies, pastries)
-- 4 Customers
-- 50 Orders across different sources
-- 3 Active coupons
-- 2 Gift cards
-- 3 Marketing campaigns
-- 3 Production records
-
-### Seed Command
-```bash
-npm run seed
-```
-
-## 🔐 Security Features
-
-- Helmet.js for HTTP headers
-- CORS protection
-- Rate limiting (100 requests / 15 min)
-- Password hashing with bcrypt
-- Input validation
-
-## 🌐 Environment Variables
+Create a `.env` file in the backend directory:
 
 ```env
 NODE_ENV=development
 PORT=5000
+
+# Database
 MONGODB_URI=mongodb://localhost:27017/cakeanatomy
-JWT_SECRET=your-secret-key
-JWT_EXPIRE=7d
-COOKIE_EXPIRE=7
+
+# JWT
+JWT_SECRET=your_super_secret_jwt_key_change_this_in_production
+JWT_EXPIRES_IN=7d
+JWT_COOKIE_EXPIRES_IN=7
+
+# Frontend
 FRONTEND_URL=http://localhost:3000
 ```
 
-## 📝 Notes
+### 3. Start MongoDB
 
-- All routes return JSON responses
-- Timestamps are automatically added to all documents
-- Soft delete implemented for Staff and Products (isActive flag)
-- Order numbers auto-generated with source prefix
-- Inventory status auto-calculated based on stock levels and expiry dates
-- Production batch numbers auto-generated
+Make sure MongoDB is running locally or use MongoDB Atlas.
 
-## 🔄 Development Workflow
+```bash
+# For local MongoDB
+mongod
+```
 
-1. Start MongoDB
-2. Run `npm run seed` to populate database
-3. Run `npm run dev` to start server
-4. Access API at `http://localhost:5000`
-5. Check health at `http://localhost:5000/health`
+### 4. Seed the Database
 
-## 📊 Dashboard Integration
+Populate the database with sample data:
 
-Frontend dashboard connects to these endpoints for:
-- Real-time order tracking
-- Inventory alerts
-- Staff management
-- Sales analytics
-- Campaign management
-- Production scheduling
+```bash
+npm run seed
+# or
+ts-node src/utils/seeder.ts
+```
 
-## 🛠️ Tech Stack
+This will create:
+- Admin user (email: admin@cakeanatomy.com, password: admin123)
+- 4 Categories (Cakes, Pastries, Confections, Bakery)
+- 10 Sample products
 
-- **Framework**: Express.js
-- **Database**: MongoDB with Mongoose ODM
-- **Language**: TypeScript
-- **Security**: Helmet, CORS, bcryptjs
-- **Utilities**: date-fns for date operations
+### 5. Start Development Server
+
+```bash
+npm run dev
+```
+
+The server will start on `http://localhost:5000`
+
+### 6. Test the API
+
+```bash
+# Health check
+curl http://localhost:5000/health
+
+# Get all products
+curl http://localhost:5000/api/products
+
+# Get all categories
+curl http://localhost:5000/api/categories
+```
+
+## API Endpoints
+
+### Authentication (`/api/auth`)
+
+| Method | Endpoint | Description | Access |
+|--------|----------|-------------|--------|
+| POST | `/register` | Register new user | Public |
+| POST | `/login` | Login user | Public |
+| GET | `/me` | Get current user | Private |
+| PUT | `/updatedetails` | Update user details | Private |
+| PUT | `/updatepassword` | Change password | Private |
+| GET | `/logout` | Logout user | Private |
+| POST | `/addresses` | Add new address | Private |
+| PUT | `/addresses/:id` | Update address | Private |
+| DELETE | `/addresses/:id` | Delete address | Private |
+
+### Products (`/api/products`)
+
+| Method | Endpoint | Description | Access |
+|--------|----------|-------------|--------|
+| GET | `/` | Get all products (with filters) | Public |
+| GET | `/featured` | Get featured products | Public |
+| GET | `/:id` | Get product by ID | Public |
+| GET | `/slug/:slug` | Get product by slug | Public |
+| POST | `/` | Create product | Admin |
+| PUT | `/:id` | Update product | Admin |
+| DELETE | `/:id` | Delete product | Admin |
+
+**Query Parameters for GET /products:**
+- `page` - Page number (default: 1)
+- `limit` - Items per page (default: 12)
+- `category` - Filter by category ID
+- `type` - Filter by type (cake, pastry, confection, bakery)
+- `minPrice` - Minimum price filter
+- `maxPrice` - Maximum price filter
+- `search` - Search by name/description
+- `featured` - Filter featured products
+- `sort` - Sort by (price-asc, price-desc, name, rating)
+
+### Categories (`/api/categories`)
+
+| Method | Endpoint | Description | Access |
+|--------|----------|-------------|--------|
+| GET | `/` | Get all categories | Public |
+| GET | `/:id` | Get category by ID | Public |
+| GET | `/slug/:slug` | Get category by slug | Public |
+| POST | `/` | Create category | Admin |
+| PUT | `/:id` | Update category | Admin |
+| DELETE | `/:id` | Delete category | Admin |
+
+### Cart (`/api/cart`)
+
+| Method | Endpoint | Description | Access |
+|--------|----------|-------------|--------|
+| GET | `/` | Get user's cart | Private |
+| GET | `/session/:sessionId` | Get cart by session | Public |
+| POST | `/items` | Add item to cart | Private |
+| PUT | `/items/:productId` | Update cart item | Private |
+| DELETE | `/items/:productId` | Remove from cart | Private |
+| DELETE | `/` | Clear cart | Private |
+| POST | `/coupon` | Apply coupon | Private |
+| POST | `/merge` | Merge guest cart | Private |
+
+### Orders (`/api/orders`)
+
+| Method | Endpoint | Description | Access |
+|--------|----------|-------------|--------|
+| POST | `/` | Create new order | Private |
+| GET | `/` | Get user's orders | Private |
+| GET | `/:id` | Get order by ID | Private |
+| PUT | `/:id/pay` | Mark order as paid | Private |
+| PUT | `/:id/cancel` | Cancel order | Private |
+| GET | `/admin/all` | Get all orders | Admin |
+| PUT | `/:id/deliver` | Mark as delivered | Admin |
+| PUT | `/:id/status` | Update order status | Admin |
+
+## Data Models
+
+### User
+- Personal info (name, email, password)
+- Multiple addresses
+- Role (customer/admin)
+- Email verification status
+
+### Product
+- Basic info (name, description, images)
+- Pricing (price, compare at price, cost)
+- Categorization (category, type, tags)
+- Stock management
+- Variants support
+- Nutritional information
+- Allergens & ingredients
+- Ratings & reviews
+
+### Category
+- Hierarchical structure
+- Slug-based URLs
+- Active/inactive status
+- Custom ordering
+
+### Cart
+- User or session-based
+- Multiple items with variants
+- Auto-calculated totals (subtotal, tax, discount)
+- Coupon support
+- Auto-expiry
+
+### Order
+- Complete order information
+- Shipping & billing addresses
+- Payment tracking
+- Order status workflow
+- Tracking number support
+- Cancellation handling
+
+## Scripts
+
+```bash
+npm run dev          # Start development server with hot reload
+npm run build        # Compile TypeScript to JavaScript
+npm start            # Start production server
+npm run seed         # Seed database with sample data
+npm run lint         # Run ESLint
+```
+
+## Error Handling
+
+The API uses consistent error responses:
+
+```json
+{
+  "success": false,
+  "status": "fail",
+  "message": "Error message here"
+}
+```
+
+### HTTP Status Codes
+- `200` - Success
+- `201` - Created
+- `400` - Bad Request
+- `401` - Unauthorized
+- `403` - Forbidden
+- `404` - Not Found
+- `500` - Internal Server Error
+
+## Security Features
+
+- **Helmet**: Sets security HTTP headers
+- **CORS**: Configured for frontend origin
+- **Rate Limiting**: 100 requests per 15 minutes
+- **JWT Authentication**: Secure token-based auth
+- **Password Hashing**: bcrypt with salt rounds
+- **Input Validation**: Express Validator
+- **Cookie Security**: HTTP-only, secure cookies in production
+
+## Development
+
+### Project Structure
+
+```
+backend/
+├── src/
+│   ├── config/          # Configuration files
+│   │   └── database.ts  # MongoDB connection
+│   ├── controllers/     # Request handlers
+│   │   ├── authController.ts
+│   │   ├── productController.ts
+│   │   ├── categoryController.ts
+│   │   ├── cartController.ts
+│   │   └── orderController.ts
+│   ├── middleware/      # Express middleware
+│   │   ├── auth.ts
+│   │   ├── errorHandler.ts
+│   │   └── validate.ts
+│   ├── models/          # Mongoose models
+│   │   ├── User.ts
+│   │   ├── Product.ts
+│   │   ├── Category.ts
+│   │   ├── Cart.ts
+│   │   ├── Order.ts
+│   │   └── Review.ts
+│   ├── routes/          # API routes
+│   │   ├── authRoutes.ts
+│   │   ├── productRoutes.ts
+│   │   ├── categoryRoutes.ts
+│   │   ├── cartRoutes.ts
+│   │   └── orderRoutes.ts
+│   ├── utils/           # Utility functions
+│   │   ├── AppError.ts
+│   │   ├── asyncHandler.ts
+│   │   ├── jwt.ts
+│   │   └── seeder.ts
+│   └── server.ts        # App entry point
+├── .env.example         # Environment variables template
+├── .gitignore
+├── package.json
+├── tsconfig.json
+└── README.md
+```
+
+## Production Deployment
+
+1. Set `NODE_ENV=production`
+2. Use strong `JWT_SECRET`
+3. Use MongoDB Atlas or managed database
+4. Set up proper CORS origins
+5. Enable HTTPS
+6. Configure environment variables
+7. Set up process manager (PM2)
+
+```bash
+npm run build
+pm2 start dist/server.js --name cakeanatomy-api
+```
+
+## License
+
+MIT

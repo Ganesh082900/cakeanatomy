@@ -1,99 +1,170 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import Product from '../models/Product';
+import Category from '../models/Category';
+import { AppError } from '../utils/AppError';
+import { asyncHandler } from '../utils/asyncHandler';
+import { AuthRequest } from '../middleware/auth';
 
-export const getAllProducts = async (req: Request, res: Response) => {
-  try {
-    const { category, isActive, search } = req.query;
-    const query: any = {};
-    
-    if (category) query.category = category;
-    if (isActive !== undefined) query.isActive = isActive === 'true';
-    if (search) {
-      query.$or = [
-        { name: { $regex: search, $options: 'i' } },
-        { tags: { $in: [new RegExp(search as string, 'i')] } }
-      ];
-    }
+// @desc    Get all products
+// @route   GET /api/products
+// @access  Public
+export const getProducts = asyncHandler(async (req: Request, res: Response) => {
+  const page = parseInt(req.query.page as string) || 1;
+  const limit = parseInt(req.query.limit as string) || 12;
+  const skip = (page - 1) * limit;
 
-    const products = await Product.find(query)
-      .populate('category', 'name slug')
-      .populate('recipe', 'name')
-      .sort({ name: 1 });
+  // Build query
+  const query: any = { isAvailable: true };
 
-    res.json({ success: true, data: products });
-  } catch (error: any) {
-    res.status(500).json({ success: false, message: error.message });
+  // Filter by category
+  if (req.query.category) {
+    query.category = req.query.category;
   }
-};
 
-export const getProductById = async (req: Request, res: Response) => {
-  try {
-    const product = await Product.findById(req.params.id)
-      .populate('category')
-      .populate('recipe');
-      
-    if (!product) {
-      return res.status(404).json({ success: false, message: 'Product not found' });
-    }
-    
-    res.json({ success: true, data: product });
-  } catch (error: any) {
-    res.status(500).json({ success: false, message: error.message });
+  // Filter by type
+  if (req.query.type) {
+    query.type = req.query.type;
   }
-};
 
-export const createProduct = async (req: Request, res: Response) => {
-  try {
-    const product = await Product.create(req.body);
-    res.status(201).json({ success: true, data: product });
-  } catch (error: any) {
-    res.status(400).json({ success: false, message: error.message });
+  // Filter by price range
+  if (req.query.minPrice || req.query.maxPrice) {
+    query.price = {};
+    if (req.query.minPrice) query.price.$gte = parseFloat(req.query.minPrice as string);
+    if (req.query.maxPrice) query.price.$lte = parseFloat(req.query.maxPrice as string);
   }
-};
 
-export const updateProduct = async (req: Request, res: Response) => {
-  try {
-    const product = await Product.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true
-    });
-    
-    if (!product) {
-      return res.status(404).json({ success: false, message: 'Product not found' });
-    }
-    
-    res.json({ success: true, data: product });
-  } catch (error: any) {
-    res.status(400).json({ success: false, message: error.message });
+  // Search by name
+  if (req.query.search) {
+    query.$or = [
+      { name: { $regex: req.query.search, $options: 'i' } },
+      { description: { $regex: req.query.search, $options: 'i' } },
+      { tags: { $in: [new RegExp(req.query.search as string, 'i')] } }
+    ];
   }
-};
 
-export const deleteProduct = async (req: Request, res: Response) => {
-  try {
-    const product = await Product.findByIdAndUpdate(
-      req.params.id,
-      { isActive: false },
-      { new: true }
-    );
-    
-    if (!product) {
-      return res.status(404).json({ success: false, message: 'Product not found' });
-    }
-    
-    res.json({ success: true, message: 'Product deactivated successfully' });
-  } catch (error: any) {
-    res.status(500).json({ success: false, message: error.message });
+  // Filter featured
+  if (req.query.featured === 'true') {
+    query.isFeatured = true;
   }
-};
 
-export const getFeaturedProducts = async (req: Request, res: Response) => {
-  try {
-    const products = await Product.find({ isFeatured: true, isActive: true })
-      .populate('category', 'name')
-      .limit(10);
-      
-    res.json({ success: true, data: products });
-  } catch (error: any) {
-    res.status(500).json({ success: false, message: error.message });
+  // Sorting
+  let sortBy = '-createdAt';
+  if (req.query.sort === 'price-asc') sortBy = 'price';
+  if (req.query.sort === 'price-desc') sortBy = '-price';
+  if (req.query.sort === 'name') sortBy = 'name';
+  if (req.query.sort === 'rating') sortBy = '-rating';
+
+  const products = await Product.find(query)
+    .populate('category', 'name slug')
+    .sort(sortBy)
+    .skip(skip)
+    .limit(limit);
+
+  const total = await Product.countDocuments(query);
+
+  res.status(200).json({
+    success: true,
+    count: products.length,
+    total,
+    page,
+    pages: Math.ceil(total / limit),
+    data: products
+  });
+});
+
+// @desc    Get single product
+// @route   GET /api/products/:id
+// @access  Public
+export const getProduct = asyncHandler(async (req: Request, res: Response) => {
+  const product = await Product.findById(req.params.id).populate('category', 'name slug');
+
+  if (!product) {
+    throw new AppError('Product not found', 404);
   }
-};
+
+  res.status(200).json({
+    success: true,
+    data: product
+  });
+});
+
+// @desc    Get product by slug
+// @route   GET /api/products/slug/:slug
+// @access  Public
+export const getProductBySlug = asyncHandler(async (req: Request, res: Response) => {
+  const product = await Product.findOne({ slug: req.params.slug }).populate('category', 'name slug');
+
+  if (!product) {
+    throw new AppError('Product not found', 404);
+  }
+
+  res.status(200).json({
+    success: true,
+    data: product
+  });
+});
+
+// @desc    Create new product
+// @route   POST /api/products
+// @access  Private/Admin
+export const createProduct = asyncHandler(async (req: AuthRequest, res: Response) => {
+  const product = await Product.create(req.body);
+
+  res.status(201).json({
+    success: true,
+    data: product
+  });
+});
+
+// @desc    Update product
+// @route   PUT /api/products/:id
+// @access  Private/Admin
+export const updateProduct = asyncHandler(async (req: AuthRequest, res: Response) => {
+  const product = await Product.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+    runValidators: true
+  });
+
+  if (!product) {
+    throw new AppError('Product not found', 404);
+  }
+
+  res.status(200).json({
+    success: true,
+    data: product
+  });
+});
+
+// @desc    Delete product
+// @route   DELETE /api/products/:id
+// @access  Private/Admin
+export const deleteProduct = asyncHandler(async (req: AuthRequest, res: Response) => {
+  const product = await Product.findByIdAndDelete(req.params.id);
+
+  if (!product) {
+    throw new AppError('Product not found', 404);
+  }
+
+  res.status(200).json({
+    success: true,
+    message: 'Product deleted successfully'
+  });
+});
+
+// @desc    Get featured products
+// @route   GET /api/products/featured
+// @access  Public
+export const getFeaturedProducts = asyncHandler(async (req: Request, res: Response) => {
+  const limit = parseInt(req.query.limit as string) || 8;
+
+  const products = await Product.find({ isFeatured: true, isAvailable: true })
+    .populate('category', 'name slug')
+    .limit(limit)
+    .sort('-createdAt');
+
+  res.status(200).json({
+    success: true,
+    count: products.length,
+    data: products
+  });
+});
