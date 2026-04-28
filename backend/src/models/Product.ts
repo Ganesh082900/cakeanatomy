@@ -4,188 +4,87 @@ export interface IProduct extends Document {
   name: string;
   slug: string;
   description: string;
-  shortDescription?: string;
   category: mongoose.Types.ObjectId;
-  type: 'pastry' | 'confection' | 'bakery' | 'cake';
-  images: string[];
+  recipe?: mongoose.Types.ObjectId;
   price: number;
   compareAtPrice?: number;
   costPrice?: number;
-  weight?: number;
-  weightUnit?: 'g' | 'kg' | 'lb';
-  dimensions?: {
-    length?: number;
-    width?: number;
-    height?: number;
-    unit?: 'cm' | 'inch';
-  };
+  images: string[];
   stock: number;
-  sku?: string;
-  isAvailable: boolean;
+  lowStockThreshold: number;
+  sku: string;
+  tags?: string[];
+  isActive: boolean;
   isFeatured: boolean;
-  tags: string[];
-  allergens: string[];
+  isCustomizable: boolean;
+  customizableOptions?: {
+    flavors?: string[];
+    sizes?: { name: string; price: number }[];
+    addons?: { name: string; price: number }[];
+  };
+  rating?: number;
+  reviewCount?: number;
+  shelfLife?: number; // in hours for finished products
+  productionTime?: number; // in minutes
+  weight?: number; // in grams
+  allergens?: string[];
   nutritionalInfo?: {
     calories?: number;
     protein?: number;
-    carbohydrates?: number;
+    carbs?: number;
     fat?: number;
-    fiber?: number;
-    sugar?: number;
   };
-  ingredients?: string[];
-  variants?: Array<{
-    name: string;
-    options: Array<{
-      value: string;
-      priceModifier: number;
-    }>;
-  }>;
-  rating: number;
-  numReviews: number;
   createdAt: Date;
   updatedAt: Date;
 }
 
-const productSchema = new Schema<IProduct>(
+const ProductSchema = new Schema<IProduct>(
   {
-    name: {
-      type: String,
-      required: [true, 'Product name is required'],
-      trim: true
+    name: { type: String, required: true },
+    slug: { type: String, required: true, unique: true },
+    description: { type: String, required: true },
+    category: { type: Schema.Types.ObjectId, ref: 'Category', required: true },
+    recipe: { type: Schema.Types.ObjectId, ref: 'Recipe' },
+    price: { type: Number, required: true },
+    compareAtPrice: { type: Number },
+    costPrice: { type: Number },
+    images: [{ type: String }],
+    stock: { type: Number, default: 0 },
+    lowStockThreshold: { type: Number, default: 10 },
+    sku: { type: String, required: true, unique: true },
+    tags: [{ type: String }],
+    isActive: { type: Boolean, default: true },
+    isFeatured: { type: Boolean, default: false },
+    isCustomizable: { type: Boolean, default: false },
+    customizableOptions: {
+      flavors: [{ type: String }],
+      sizes: [
+        {
+          name: String,
+          price: Number
+        }
+      ],
+      addons: [
+        {
+          name: String,
+          price: Number
+        }
+      ]
     },
-    slug: {
-      type: String,
-      required: true,
-      unique: true,
-      lowercase: true
-    },
-    description: {
-      type: String,
-      required: [true, 'Product description is required']
-    },
-    shortDescription: {
-      type: String,
-      maxlength: 200
-    },
-    category: {
-      type: Schema.Types.ObjectId,
-      ref: 'Category',
-      required: [true, 'Product category is required']
-    },
-    type: {
-      type: String,
-      enum: ['pastry', 'confection', 'bakery', 'cake'],
-      required: [true, 'Product type is required']
-    },
-    images: {
-      type: [String],
-      validate: {
-        validator: function(v: string[]) {
-          return v && v.length > 0;
-        },
-        message: 'At least one product image is required'
-      }
-    },
-    price: {
-      type: Number,
-      required: [true, 'Product price is required'],
-      min: [0, 'Price cannot be negative']
-    },
-    compareAtPrice: {
-      type: Number,
-      min: [0, 'Compare at price cannot be negative']
-    },
-    costPrice: {
-      type: Number,
-      min: [0, 'Cost price cannot be negative']
-    },
-    weight: Number,
-    weightUnit: {
-      type: String,
-      enum: ['g', 'kg', 'lb'],
-      default: 'g'
-    },
-    dimensions: {
-      length: Number,
-      width: Number,
-      height: Number,
-      unit: {
-        type: String,
-        enum: ['cm', 'inch'],
-        default: 'cm'
-      }
-    },
-    stock: {
-      type: Number,
-      required: true,
-      min: [0, 'Stock cannot be negative'],
-      default: 0
-    },
-    sku: {
-      type: String,
-      unique: true,
-      sparse: true
-    },
-    isAvailable: {
-      type: Boolean,
-      default: true
-    },
-    isFeatured: {
-      type: Boolean,
-      default: false
-    },
-    tags: [String],
-    allergens: [String],
+    rating: { type: Number, default: 0 },
+    reviewCount: { type: Number, default: 0 },
+    shelfLife: { type: Number },
+    productionTime: { type: Number },
+    weight: { type: Number },
+    allergens: [{ type: String }],
     nutritionalInfo: {
       calories: Number,
       protein: Number,
-      carbohydrates: Number,
-      fat: Number,
-      fiber: Number,
-      sugar: Number
-    },
-    ingredients: [String],
-    variants: [{
-      name: String,
-      options: [{
-        value: String,
-        priceModifier: { type: Number, default: 0 }
-      }]
-    }],
-    rating: {
-      type: Number,
-      default: 0,
-      min: 0,
-      max: 5
-    },
-    numReviews: {
-      type: Number,
-      default: 0
+      carbs: Number,
+      fat: Number
     }
   },
-  {
-    timestamps: true
-  }
+  { timestamps: true }
 );
 
-// Generate slug from name before saving
-productSchema.pre('save', function (next) {
-  if (this.isModified('name')) {
-    this.slug = this.name
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '');
-  }
-  next();
-});
-
-// Update isAvailable based on stock
-productSchema.pre('save', function (next) {
-  if (this.stock === 0) {
-    this.isAvailable = false;
-  }
-  next();
-});
-
-export default mongoose.model<IProduct>('Product', productSchema);
+export default mongoose.model<IProduct>('Product', ProductSchema);

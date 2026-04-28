@@ -1,7 +1,7 @@
 {
   "name": "cakeanatomy-backend",
   "version": "1.0.0",
-  "description": "Backend API for CakeAnatomy e-commerce platform",
+  "description": "CakeAnatomy Dashboard Backend API",
   "main": "dist/server.js",
   "scripts": {
     "dev": "nodemon src/server.ts",

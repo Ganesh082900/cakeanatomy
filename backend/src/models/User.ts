@@ -4,6 +4,13 @@ import bcrypt from 'bcryptjs';
 export interface IUser extends Document {
   name: string;
   email: string;
+  phone: string;
+  password: string;
+  role: 'customer' | 'admin';
+  dateOfBirth?: Date;
+  anniversary?: Date;
+  addresses?: {
+    type: 'home' | 'work' | 'other';
   password: string;
   phone?: string;
   role: 'customer' | 'admin';
@@ -15,6 +22,18 @@ export interface IUser extends Document {
     city: string;
     state: string;
     zipCode: string;
+    landmark?: string;
+    isDefault: boolean;
+  }[];
+  loyaltyPoints: number;
+  preferences?: {
+    favoriteProducts?: mongoose.Types.ObjectId[];
+    allergies?: string[];
+    dietaryRestrictions?: string[];
+  };
+  totalOrders: number;
+  totalSpent: number;
+  lastOrderDate?: Date;
     country: string;
     isDefault: boolean;
   }>;
@@ -26,6 +45,17 @@ export interface IUser extends Document {
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
+const UserSchema = new Schema<IUser>(
+  {
+    name: { type: String, required: true },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true
+    },
+    phone: { type: String, required: true },
+    password: { type: String, required: true, select: false },
 const addressSchema = new Schema({
   label: { type: String, required: true },
   street: { type: String, required: true },
@@ -68,6 +98,39 @@ const userSchema = new Schema<IUser>(
       enum: ['customer', 'admin'],
       default: 'customer'
     },
+    dateOfBirth: { type: Date },
+    anniversary: { type: Date },
+    addresses: [
+      {
+        type: {
+          type: String,
+          enum: ['home', 'work', 'other'],
+          default: 'home'
+        },
+        street: { type: String, required: true },
+        city: { type: String, required: true },
+        state: { type: String, required: true },
+        zipCode: { type: String, required: true },
+        landmark: String,
+        isDefault: { type: Boolean, default: false }
+      }
+    ],
+    loyaltyPoints: { type: Number, default: 0 },
+    preferences: {
+      favoriteProducts: [{ type: Schema.Types.ObjectId, ref: 'Product' }],
+      allergies: [{ type: String }],
+      dietaryRestrictions: [{ type: String }]
+    },
+    totalOrders: { type: Number, default: 0 },
+    totalSpent: { type: Number, default: 0 },
+    lastOrderDate: { type: Date }
+  },
+  { timestamps: true }
+);
+
+// Hash password before saving
+UserSchema.pre('save', async function (next) {
+  if (!this.isModified('password')) return next();
     avatar: String,
     addresses: [addressSchema],
     isEmailVerified: {

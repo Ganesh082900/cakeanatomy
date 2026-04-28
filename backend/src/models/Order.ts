@@ -16,214 +16,154 @@ export interface IOrderItem {
 
 export interface IOrder extends Document {
   orderNumber: string;
-  user: mongoose.Types.ObjectId;
+  source: 'platform' | 'swiggy' | 'zomato' | 'in-store' | 'phone' | 'whatsapp';
+  sourceOrderId?: string; // For Swiggy/Zomato order IDs
+  customer: mongoose.Types.ObjectId;
   items: IOrderItem[];
-  shippingAddress: {
-    street: string;
-    city: string;
-    state: string;
-    zipCode: string;
-    country: string;
-    phone: string;
-  };
-  billingAddress?: {
-    street: string;
-    city: string;
-    state: string;
-    zipCode: string;
-    country: string;
-  };
-  paymentMethod: 'card' | 'upi' | 'netbanking' | 'cod' | 'wallet';
-  paymentStatus: 'pending' | 'processing' | 'completed' | 'failed' | 'refunded';
-  paymentResult?: {
-    id: string;
-    status: string;
-    updateTime: Date;
-    emailAddress?: string;
-  };
-  itemsPrice: number;
-  taxPrice: number;
-  shippingPrice: number;
+  subtotal: number;
+  tax: number;
+  deliveryFee: number;
   discount: number;
-  totalPrice: number;
   couponCode?: string;
-  orderStatus: 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
-  isPaid: boolean;
-  paidAt?: Date;
-  isDelivered: boolean;
-  deliveredAt?: Date;
-  cancelledAt?: Date;
-  cancellationReason?: string;
-  notes?: string;
-  trackingNumber?: string;
-  estimatedDelivery?: Date;
+  giftCardCode?: string;
+  total: number;
+  status: 'pending' | 'confirmed' | 'in-production' | 'ready' | 'out-for-delivery' | 'delivered' | 'completed' | 'cancelled';
+  paymentStatus: 'pending' | 'paid' | 'failed' | 'refunded';
+  paymentMethod: 'cash' | 'card' | 'upi' | 'online' | 'gift-card';
+  transactionId?: string;
+  orderType: 'delivery' | 'pickup' | 'dine-in';
+  deliveryAddress?: {
+    street: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    landmark?: string;
+  };
+  deliveryTime?: Date;
+  assignedDeliveryStaff?: mongoose.Types.ObjectId;
+  scheduledPickupTime?: Date;
+  customerNotes?: string;
+  internalNotes?: string;
+  statusHistory?: {
+    status: string;
+    timestamp: Date;
+    updatedBy?: mongoose.Types.ObjectId;
+  }[];
+  isCustomCake: boolean;
+  customCakeDetails?: {
+    consultationDate?: Date;
+    designApproved: boolean;
+    advancePayment?: number;
+  };
   createdAt: Date;
   updatedAt: Date;
 }
 
-const orderItemSchema = new Schema({
-  product: {
-    type: Schema.Types.ObjectId,
-    ref: 'Product',
-    required: true
-  },
-  name: {
-    type: String,
-    required: true
-  },
-  image: {
-    type: String,
-    required: true
-  },
-  quantity: {
-    type: Number,
-    required: true,
-    min: 1
-  },
-  price: {
-    type: Number,
-    required: true,
-    min: 0
-  },
-  selectedVariants: [{
-    name: String,
-    value: String,
-    priceModifier: Number
-  }],
-  subtotal: {
-    type: Number,
-    required: true
-  }
-});
-
-const addressSchema = new Schema({
-  street: { type: String, required: true },
-  city: { type: String, required: true },
-  state: { type: String, required: true },
-  zipCode: { type: String, required: true },
-  country: { type: String, required: true, default: 'India' },
-  phone: String
-});
-
-const orderSchema = new Schema<IOrder>(
+const OrderSchema = new Schema<IOrder>(
   {
-    orderNumber: {
+    orderNumber: { type: String, required: true, unique: true },
+    source: {
       type: String,
       required: true,
-      unique: true
+      enum: ['platform', 'swiggy', 'zomato', 'in-store', 'phone', 'whatsapp']
     },
-    user: {
-      type: Schema.Types.ObjectId,
-      ref: 'User',
-      required: true
-    },
-    items: {
-      type: [orderItemSchema],
-      validate: {
-        validator: function(v: IOrderItem[]) {
-          return v && v.length > 0;
-        },
-        message: 'Order must have at least one item'
+    sourceOrderId: { type: String },
+    customer: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    items: [
+      {
+        product: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
+        name: { type: String, required: true },
+        quantity: { type: Number, required: true },
+        price: { type: Number, required: true },
+        customization: {
+          flavor: String,
+          size: String,
+          message: String,
+          designImage: String
+        }
       }
-    },
-    shippingAddress: {
-      type: addressSchema,
-      required: true
-    },
-    billingAddress: addressSchema,
-    paymentMethod: {
+    ],
+    subtotal: { type: Number, required: true },
+    tax: { type: Number, default: 0 },
+    deliveryFee: { type: Number, default: 0 },
+    discount: { type: Number, default: 0 },
+    couponCode: { type: String },
+    giftCardCode: { type: String },
+    total: { type: Number, required: true },
+    status: {
       type: String,
-      enum: ['card', 'upi', 'netbanking', 'cod', 'wallet'],
-      required: true
+      required: true,
+      enum: ['pending', 'confirmed', 'in-production', 'ready', 'out-for-delivery', 'delivered', 'completed', 'cancelled'],
+      default: 'pending'
     },
     paymentStatus: {
       type: String,
-      enum: ['pending', 'processing', 'completed', 'failed', 'refunded'],
+      required: true,
+      enum: ['pending', 'paid', 'failed', 'refunded'],
       default: 'pending'
     },
-    paymentResult: {
-      id: String,
-      status: String,
-      updateTime: Date,
-      emailAddress: String
-    },
-    itemsPrice: {
-      type: Number,
-      required: true,
-      min: 0
-    },
-    taxPrice: {
-      type: Number,
-      required: true,
-      default: 0
-    },
-    shippingPrice: {
-      type: Number,
-      required: true,
-      default: 0
-    },
-    discount: {
-      type: Number,
-      default: 0
-    },
-    totalPrice: {
-      type: Number,
-      required: true,
-      min: 0
-    },
-    couponCode: String,
-    orderStatus: {
+    paymentMethod: {
       type: String,
-      enum: ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'],
-      default: 'pending'
+      required: true,
+      enum: ['cash', 'card', 'upi', 'online', 'gift-card']
     },
-    isPaid: {
-      type: Boolean,
-      default: false
+    transactionId: { type: String },
+    orderType: {
+      type: String,
+      required: true,
+      enum: ['delivery', 'pickup', 'dine-in']
     },
-    paidAt: Date,
-    isDelivered: {
-      type: Boolean,
-      default: false
+    deliveryAddress: {
+      street: String,
+      city: String,
+      state: String,
+      zipCode: String,
+      landmark: String
     },
-    deliveredAt: Date,
-    cancelledAt: Date,
-    cancellationReason: String,
-    notes: String,
-    trackingNumber: String,
-    estimatedDelivery: Date
+    deliveryTime: { type: Date },
+    assignedDeliveryStaff: { type: Schema.Types.ObjectId, ref: 'Staff' },
+    scheduledPickupTime: { type: Date },
+    customerNotes: { type: String },
+    internalNotes: { type: String },
+    statusHistory: [
+      {
+        status: { type: String, required: true },
+        timestamp: { type: Date, default: Date.now },
+        updatedBy: { type: Schema.Types.ObjectId, ref: 'Staff' }
+      }
+    ],
+    isCustomCake: { type: Boolean, default: false },
+    customCakeDetails: {
+      consultationDate: Date,
+      designApproved: { type: Boolean, default: false },
+      advancePayment: Number
+    }
   },
-  {
-    timestamps: true
-  }
+  { timestamps: true }
 );
 
-// Generate unique order number
-orderSchema.pre('save', async function (next) {
-  if (this.isNew) {
-    const timestamp = Date.now().toString(36).toUpperCase();
-    const random = Math.random().toString(36).substring(2, 6).toUpperCase();
-    this.orderNumber = `ORD-${timestamp}-${random}`;
+// Generate order number before saving
+OrderSchema.pre('save', async function (next) {
+  if (this.isNew && !this.orderNumber) {
+    const count = await mongoose.model('Order').countDocuments();
+    const date = new Date();
+    const prefix = this.source.substring(0, 2).toUpperCase();
+    this.orderNumber = `${prefix}${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, '0')}${String(count + 1).padStart(5, '0')}`;
   }
+  
+  // Add to status history if status changed
+  if (this.isModified('status')) {
+    if (!this.statusHistory) {
+      this.statusHistory = [];
+    }
+    this.statusHistory.push({
+      status: this.status,
+      timestamp: new Date(),
+      updatedBy: undefined
+    });
+  }
+  
   next();
 });
 
-// Update payment status when order is paid
-orderSchema.pre('save', function (next) {
-  if (this.isModified('isPaid') && this.isPaid && !this.paidAt) {
-    this.paidAt = new Date();
-    this.paymentStatus = 'completed';
-  }
-  next();
-});
-
-// Update delivery status
-orderSchema.pre('save', function (next) {
-  if (this.isModified('isDelivered') && this.isDelivered && !this.deliveredAt) {
-    this.deliveredAt = new Date();
-    this.orderStatus = 'delivered';
-  }
-  next();
-});
-
-export default mongoose.model<IOrder>('Order', orderSchema);
+export default mongoose.model<IOrder>('Order', OrderSchema);

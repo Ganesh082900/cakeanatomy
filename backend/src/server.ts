@@ -1,41 +1,42 @@
-import express, { Application } from 'express';
+import express, { Application, Request, Response } from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
-import cookieParser from 'cookie-parser';
-import compression from 'compression';
 import helmet from 'helmet';
+import cookieParser from 'cookie-parser';
 import rateLimit from 'express-rate-limit';
-import connectDatabase from './config/database';
-import { errorHandler, notFound } from './middleware/errorHandler';
-
-// Load env vars
-dotenv.config();
+import connectDB from './config/database';
 
 // Import routes
-import authRoutes from './routes/authRoutes';
-import productRoutes from './routes/productRoutes';
-import categoryRoutes from './routes/categoryRoutes';
-import cartRoutes from './routes/cartRoutes';
 import orderRoutes from './routes/orderRoutes';
+import staffRoutes from './routes/staffRoutes';
+import inventoryRoutes from './routes/inventoryRoutes';
+import productRoutes from './routes/productRoutes';
+import couponRoutes from './routes/couponRoutes';
+import campaignRoutes from './routes/campaignRoutes';
+import analyticsRoutes from './routes/analyticsRoutes';
+import productionRoutes from './routes/productionRoutes';
+import userRoutes from './routes/userRoutes';
 
-// Connect to database
-connectDatabase();
+// Load environment variables
+dotenv.config();
 
 // Initialize express app
 const app: Application = express();
+
+// Connect to database
+connectDB();
 
 // Security middleware
 app.use(helmet());
 
 // Rate limiting
 const limiter = rateLimit({
-  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000'), // 15 minutes
-  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '100'),
-  message: 'Too many requests from this IP, please try again later.'
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100 // limit each IP to 100 requests per windowMs
 });
-app.use('/api', limiter);
+app.use('/api/', limiter);
 
-// CORS
+// CORS configuration
 app.use(
   cors({
     origin: process.env.FRONTEND_URL || 'http://localhost:3000',
@@ -43,41 +44,55 @@ app.use(
   })
 );
 
-// Body parser
+// Body parser middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Cookie parser
 app.use(cookieParser());
 
-// Compression
-app.use(compression());
+// API Routes
+app.use('/api/orders', orderRoutes);
+app.use('/api/staff', staffRoutes);
+app.use('/api/inventory', inventoryRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/coupons', couponRoutes);
+app.use('/api/campaigns', campaignRoutes);
+app.use('/api/analytics', analyticsRoutes);
+app.use('/api/production', productionRoutes);
+app.use('/api/users', userRoutes);
 
-// Health check
-app.get('/health', (req, res) => {
+// Health check route
+app.get('/health', (req: Request, res: Response) => {
   res.status(200).json({
     success: true,
-    message: 'Server is running',
-    timestamp: new Date().toISOString()
+    message: 'CakeAnatomy API is running',
+    timestamp: new Date()
   });
 });
 
-// Mount routers
-app.use('/api/auth', authRoutes);
-app.use('/api/products', productRoutes);
-app.use('/api/categories', categoryRoutes);
-app.use('/api/cart', cartRoutes);
-app.use('/api/orders', orderRoutes);
+// Error handling middleware
+app.use((err: any, req: Request, res: Response, next: any) => {
+  console.error(err.stack);
+  res.status(err.statusCode || 500).json({
+    success: false,
+    message: err.message || 'Internal Server Error'
+  });
+});
 
-// Error handlers (must be last)
-app.use(notFound);
-app.use(errorHandler);
+// 404 handler
+app.use((req: Request, res: Response) => {
+  res.status(404).json({
+    success: false,
+    message: 'Route not found'
+  });
+});
 
 // Start server
 const PORT = process.env.PORT || 5000;
-
 app.listen(PORT, () => {
-  console.log(`🚀 Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
 });
 
 export default app;
